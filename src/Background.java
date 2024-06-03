@@ -1,6 +1,6 @@
-import java.util.List;
-
 import processing.core.PImage;
+
+import java.util.List;
 
 /** Represents a background for the 2D world. */
 public final class Background {

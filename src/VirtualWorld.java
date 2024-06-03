@@ -1,6 +1,7 @@
-import java.util.*;
+import processing.core.PApplet;
 
-import processing.core.*;
+import java.util.List;
+import java.util.Optional;
 
 public final class VirtualWorld extends PApplet {
     public static final int TILE_WIDTH = 32;
@@ -94,11 +95,23 @@ public final class VirtualWorld extends PApplet {
             world = WorldParser.createFromString(loadString, imageLibrary);
         }
     }
-
     /** Called to start all entity's actions and behaviors when the program starts. */
     public void scheduleActions(World world, EventScheduler scheduler, ImageLibrary imageLibrary) {
         for (Entity entity : world.getEntities()) {
-            entity.scheduleActions(scheduler, world, imageLibrary);
+            if (entity instanceof BehaviorEntity) {
+                BehaviorEntity entity1 = (BehaviorEntity) entity;
+                entity1.scheduleActions(scheduler, world, imageLibrary);
+
+            }
+
+            else if (entity instanceof AnimationEntity) {
+                AnimationEntity entity2 = (AnimationEntity) entity;
+                entity2.scheduleActions(scheduler, world, imageLibrary);
+
+            }
+
+
+
         }
     }
 

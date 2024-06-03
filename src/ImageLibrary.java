@@ -1,9 +1,14 @@
-import java.io.*;
-import java.util.*;
-
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PImage;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 /** Stores sequences of image data to be used by the program. */
 public class ImageLibrary {
