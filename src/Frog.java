@@ -8,46 +8,95 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class Frog extends AnimationEntity{
-//move to or execute behavior check if position is different than before and change background
+public class Frog extends AnimationEntity implements Moveable{
+
 
     public static final String FROG_KEY = "frog";
-    public static final int FROG_PARSE_PROPERTY_ANIMATION_PERIOD_INDEX = 0;
-    public static final int FROG_PARSE_PROPERTY_BEHAVIOR_PERIOD_INDEX = 1;
-    public static final int FROG_PARSE_PROPERTY_COUNT = 2; //??????????
-
-    int breath = 2; //number of fairies frogs can transform before it has to go back to the water or can set random between 1-3
 
 
-    public Frog(String id, Point position, List<PImage> images, double behaviorPeriod, double animationPeriod, int breath) {
+    int count = 0;
+    public Frog(String id, Point position, List<PImage> images, double behaviorPeriod, double animationPeriod) {
         super(id, position, images, behaviorPeriod, animationPeriod);
-        this.breath = breath;
+
     }
 
 
     public void executeBehavior(World world, ImageLibrary imageLibrary, EventScheduler scheduler) {
-        Optional<Entity> fairyTarget = world.findNearest(getPosition(), new ArrayList<>(List.of(Fairy.class)));
-        //find next target
 
-        if (fairyTarget.isPresent()) {
-            Point tgtPos = fairyTarget.get().getPosition();
+        Background bg = world.getBackgroundCell(getPosition());
 
-            if (moveTo(world, fairyTarget.get(), scheduler)) {
-                AnimationEntity sapling = new Sapling(Sapling.SAPLING_KEY + "_" + fairyTarget.get().getId(), tgtPos, imageLibrary.get(Sapling.SAPLING_KEY), Sapling.SAPLING_BEHAVIOR_PERIOD, Sapling.SAPLING_ANIMATION_PERIOD, 0);
-
-                world.addEntity(sapling);
-                sapling.scheduleActions(scheduler, world, imageLibrary);
-                //put something like this in mouse pressed
-            }
+        if (bg.getId().equals("water_tile") || bg.getId().equals("water") || bg.getId().equals("water_edge") ){
+                    //don't do anything
         }
 
+        else{
+            Background background = new Background("slime", imageLibrary.get("slime"), 0);
+
+            world.setBackgroundCell(getPosition(), background);
+
+
+        }
+
+
+
+
+        Optional<Entity> frogTarget = world.findNearest(getPosition(), new ArrayList<>(List.of(Fairy.class)));
+
+        if (frogTarget.isPresent()) {
+
+            Point tgtPos = frogTarget.get().getPosition();
+
+            if (moveTo(world, frogTarget.get(), scheduler)) {
+                AnimationEntity bee = new Bee(Bee.BEE_KEY + "_" + frogTarget.get().getId(), tgtPos, imageLibrary.get(Bee.BEE_KEY), 2.0, 1.0);
+
+                world.addEntity(bee);
+                bee.scheduleActions(scheduler, world, imageLibrary);
+
+            }
+
+
+//add water after going on water
+//move to or execute behavior check if position is different than before and change background
+            //if (!(world.getOccupant(getPosition()).get() instanceof Water)) {
+
+        /*
+            if (wasOnWater && !getPosition().equals(PREV_POINT) ){
+                Entity water = new Water(Water.WATER_KEY, PREV_POINT, imageLibrary.get(Water.WATER_KEY));
+                if (world.isOccupied(PREV_POINT) && !(world.getOccupant(PREV_POINT).get() instanceof Frog)){
+                    world.removeEntity(scheduler, world.getOccupant(PREV_POINT).get());
+                    if (!world.isOccupied(getPosition()) && !(world.getOccupant(getPosition()).get() instanceof Frog)) {
+                        world.addEntity(this);
+                    }
+
+                }
+
+                world.addEntity(water);
+
+            }
+            */
+
+
+
+
+        }
+
+
+
         scheduleBehavior(scheduler, world, imageLibrary);
+
+
     }
 
+//if touch water reset breath if touch bee then transform
     public boolean moveTo(World world, Entity target, EventScheduler scheduler) {
+
         if (getPosition().adjacentTo(target.getPosition())) {
             world.removeEntity(scheduler, target);
             return true;
+
+        //} else if (breath >= 1){
+            //return false;
+
         } else {
             Point nextPos = nextPosition(world, target.getPosition());
             if (!getPosition().equals(nextPos)) {
@@ -60,7 +109,7 @@ public class Frog extends AnimationEntity{
     public Point nextPosition(World world, Point destination) {
         // Differences between the destination and current position along each axis
         PathingStrategy pathingStrategy = new AStarPathingStrategy();
-        Predicate<Point> canPassThrough = point -> world.inBounds(point) && !(world.isOccupied(point)); //in bounds and if not occupied
+        Predicate<Point> canPassThrough = point -> world.inBounds(point) && (!(world.isOccupied(point)) || (world.isOccupied(point) && world.getOccupant(point).get() instanceof Water)); //in bounds and if not occupied or if occupied has to be water
         BiPredicate<Point, Point> withinReach = (a, b) -> ((a.x == b.x) && Math.abs(b.y - a.y) == 1) || ((a.y == b.y) && Math.abs(b.x - a.x) == 1);
         Function<Point, Stream<Point>> potentialNeighbors =  PathingStrategy.CARDINAL_NEIGHBORS;
 
@@ -77,7 +126,6 @@ public class Frog extends AnimationEntity{
         }
 
     }
-
 
 
 

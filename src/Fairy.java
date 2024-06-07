@@ -31,7 +31,7 @@ public class Fairy extends AnimationEntity implements Moveable {
 
                 world.addEntity(sapling);
                 sapling.scheduleActions(scheduler, world, imageLibrary);
-                //put something like this in mouse pressed
+
             }
         }
 

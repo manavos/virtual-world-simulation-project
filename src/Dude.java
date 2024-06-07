@@ -29,11 +29,29 @@ public class Dude extends AnimationEntity implements Transformable, Moveable{
     }
 
     public void executeBehavior(World world, ImageLibrary imageLibrary, EventScheduler scheduler) {
+        Background bg = world.getBackgroundCell(getPosition());
+        if (bg.getId().equals("slime")) {
+            AnimationEntity slimedude = new slimeDude("slimedude", getPosition(), imageLibrary.get(slimeDude.SLIME_DUDE_KEY), getBehaviorPeriod(), getAnimationPeriod(), false, false );
+
+            world.removeEntity(scheduler, this);
+
+            world.addEntity(slimedude);
+            slimedude.scheduleActions(scheduler, world, imageLibrary);
+
+            return;
+
+        }
+
         Optional<Entity> dudeTarget = findDudeTarget(world);
-        if (dudeTarget.isEmpty() || !moveTo(world, dudeTarget.get(), scheduler) || !transform(world, scheduler, imageLibrary)) {
+
+        if (dudeTarget.isEmpty() || !moveTo(world, dudeTarget.get(), scheduler) || !transform(world, scheduler, imageLibrary))  {
             scheduleBehavior(scheduler, world, imageLibrary);
         }
+
     }
+
+
+
 
     /** Returns the (optional) entity a Dude will path toward. */
     public Optional<Entity> findDudeTarget(World world) {
@@ -103,9 +121,14 @@ public class Dude extends AnimationEntity implements Transformable, Moveable{
 
     /** Changes the Dude's graphics. */
     public boolean transform(World world, EventScheduler scheduler, ImageLibrary imageLibrary) {
+
+
+        //else if ((world.isOccupied(getPosition()) && world.getOccupant(getPosition()).get() instanceof Slime)){ //if touches slime
+
+
         if (resourceCount < resourceLimit) {
             resourceCount += 1;
-            if (resourceCount == resourceLimit) {
+            if (resourceCount == resourceLimit) { //not changing to slimedude if transformed
                 AnimationEntity dude = new Dude(getId(), getPosition(), imageLibrary.get(DUDE_KEY + "_carry"), getBehaviorPeriod(), getAnimationPeriod(), resourceCount, resourceLimit);
 
                 world.removeEntity(scheduler, this);
@@ -115,7 +138,10 @@ public class Dude extends AnimationEntity implements Transformable, Moveable{
 
                 return true;
             }
-        } else {
+        }
+
+        else {
+
             Dude dude = new Dude(getId(), getPosition(), imageLibrary.get(DUDE_KEY), getBehaviorPeriod(), getAnimationPeriod(), 0, resourceLimit);
 
             world.removeEntity(scheduler, this);
@@ -124,7 +150,13 @@ public class Dude extends AnimationEntity implements Transformable, Moveable{
             dude.scheduleActions(scheduler, world, imageLibrary);
 
             return true;
+
+
+
+
         }
+
+
 
         return false;
     }

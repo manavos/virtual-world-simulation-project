@@ -133,14 +133,67 @@ public final class VirtualWorld extends PApplet {
         Point pressed = mouseToPoint();
         System.out.println("Click Location (" + pressed.x + ", " + pressed.y + ")");
 
+
+        AnimationEntity frog = new Frog(
+                Frog.FROG_KEY,
+                pressed,
+                imageLibrary.get(Frog.FROG_KEY),
+                1.0,
+                1.0
+        );
+
+        world.addEntity(frog);
+        frog.scheduleActions(scheduler, world, imageLibrary);
+
+        Background background = new Background("slime", imageLibrary.get("slime"), 0);
+        world.setBackgroundCell(pressed, background);
+
+        List<Point> neighborslist = new java.util.ArrayList<>(PathingStrategy.CARDINAL_NEIGHBORS.apply(pressed)
+                .toList());
+
+        
+        neighborslist.add(new Point (pressed.x - 1, pressed.y + 1)); //top left
+        neighborslist.add(new Point (pressed.x - 1, pressed.y - 1)); //bottom left
+        neighborslist.add(new Point (pressed.x + 1, pressed.y + 1)); //top right
+        neighborslist.add(new Point (pressed.x + 1, pressed.y - 1)); //bottom right
+
+        for (Point n : neighborslist){
+            if (world.inBounds(n)){
+                world.setBackgroundCell(n, background);
+
+            }
+        }
+
+
+
+
+        //❗Important: Do not assign any of the “INDEX” constant values to any instance variable.
+
+
         Optional<Entity> entityOptional = world.getOccupant(pressed);
         if (entityOptional.isPresent()) {
             Entity entity = entityOptional.get();
 
+
+
             if (entity.log() != null) {
                 System.out.println(entity.log());
+
+
+
             }
         }
+
+
+
+
+
+
+
+
+
+
+
     }
 
     /** Converts mouse position to world position. */

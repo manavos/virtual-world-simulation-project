@@ -8,12 +8,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class Bee extends AnimationEntity{
+public class Bee extends AnimationEntity implements Moveable{
 
     public static final String BEE_KEY = "bee";
-    public static final int BEE_PARSE_PROPERTY_ANIMATION_PERIOD_INDEX = 0;
-    public static final int BEE_PARSE_PROPERTY_BEHAVIOR_PERIOD_INDEX = 1;
-    public static final int BEE_PARSE_PROPERTY_COUNT = 2; //??????????
 
 
     public Bee(String id, Point position, List<PImage> images, double behaviorPeriod, double animationPeriod) {
@@ -21,17 +18,17 @@ public class Bee extends AnimationEntity{
     }
 
     public void executeBehavior(World world, ImageLibrary imageLibrary, EventScheduler scheduler) {
-        Optional<Entity> fairyTarget = world.findNearest(getPosition(), new ArrayList<>(List.of(Stump.class)));
+        Optional<Entity> beeTarget = world.findNearest(getPosition(), new ArrayList<>(List.of(Tree.class)));
         //find next target
 
-        if (fairyTarget.isPresent()) {
-            Point tgtPos = fairyTarget.get().getPosition();
+        if (beeTarget.isPresent()) {
+            Point tgtPos = beeTarget.get().getPosition();
 
-            if (moveTo(world, fairyTarget.get(), scheduler)) {
-                AnimationEntity sapling = new Flower(Flower.FLOWER_KEY + "_" + fairyTarget.get().getId(), tgtPos, imageLibrary.get(Flower.FLOWER_KEY), Flower.FLOWER_PARSE_PROPERTY_BEHAVIOR_PERIOD_INDEX, Flower.FLOWER_PARSE_PROPERTY_ANIMATION_PERIOD_INDEX);
+            if (moveTo(world, beeTarget.get(), scheduler)) {
+                AnimationEntity seed = new Seed(Seed.SEED_KEY + "_" + beeTarget.get().getId(), tgtPos, imageLibrary.get(Seed.SEED_KEY), Seed.SEED_BEHAVIOR_PERIOD, Seed.SEED_ANIMATION_PERIOD, 0);
 
-                world.addEntity(sapling);
-                sapling.scheduleActions(scheduler, world, imageLibrary);
+                world.addEntity(seed);
+                seed.scheduleActions(scheduler, world, imageLibrary);
                 //put something like this in mouse pressed
             }
         }
